@@ -1,8 +1,9 @@
+
 export interface User {
   id: string;
   email: string;
-  fullName: string;
-  avatarUrl?: string;
+  name: string;
+  role: "user" | "admin";
   createdAt: string;
 }
 
@@ -20,7 +21,7 @@ export interface LoginRequest {
 export interface SignupRequest {
   email: string;
   password: string;
-  fullName: string;
+  name: string;
 }
 
 export interface AuthResponse {
