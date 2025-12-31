@@ -18,16 +18,13 @@ export async function createTransaction(req: Request, res: Response) {
       date,
       description,
     });
-    console.log("👉 createTransaction called");
-    console.log("👉 userId:", req.user?.userId);
-    console.log("👉 body:", req.body);
+    console.log(" createTransaction called");
+    console.log(" userId:", req.user?.userId);
+    console.log(" body:", req.body);
 
 
-    return res.status(201).json({
-      message: "Transaction created successfully",
-      transaction,
-      
-    });
+    return res.status(201).json(transaction);
+
   } catch (error) {
     console.error("Create transaction error:", error);
     return res.status(500).json({
@@ -40,7 +37,7 @@ export async function createTransaction(req: Request, res: Response) {
 
 
 /**
- * 📄 Get user transactions
+ *  Get user transactions
  */
 export async function getTransactions(req: Request, res: Response) {
   try {
@@ -59,7 +56,7 @@ export async function getTransactions(req: Request, res: Response) {
   }
 }
 /**
- * ❌ Delete transaction
+ *  Delete transaction
  */
 export async function deleteTransaction(req: Request, res: Response) {
     try {
