@@ -158,11 +158,9 @@ export default function Auth() {
             </div>
           </CardContent>
         </Card>
-
-        <p className="text-center text-gray-600 text-sm mt-8">
-          Demo: Use any email/password. Data is stored locally.
-        </p>
       </div>
     </div>
   );
 }
+
+      

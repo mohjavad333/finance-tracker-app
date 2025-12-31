@@ -1,12 +1,14 @@
-import React, { createContext, useEffect, useState } from 'react';
-import { User, AuthState } from '../types/auth';
-import { authService } from '../services/authService';
+import React, { createContext, useEffect, useState } from "react";
+import { User, AuthState } from "../types/auth";
+import { authService } from "../services/authService";
 
-export const AuthContext = createContext<AuthState & {
+type AuthContextType = AuthState & {
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, fullName: string) => Promise<void>;
+  signup: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
-}>({
+};
+
+export const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
   isLoading: true,
@@ -15,7 +17,9 @@ export const AuthContext = createContext<AuthState & {
   logout: async () => {},
 });
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [authState, setAuthState] = useState<AuthState>({
     user: null,
     isAuthenticated: false,
@@ -23,65 +27,78 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   useEffect(() => {
-    const token = authService.getToken();
-    const user = authService.getUser();
+    const initAuth = async () => {
+      const token = authService.getToken();
 
-    if (token && user) {
-      setAuthState({
-        user,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    } else {
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-      });
-    }
+      if (!token) {
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+        return;
+      }
+
+      try {
+        const user = await authService.getMe();
+
+        authService.setUser(user);
+
+        setAuthState({
+          user,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+      } catch {
+        authService.logout();
+        setAuthState({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
+      }
+    };
+
+    initAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
-    try {
-      const response = await authService.login({ email, password });
-      authService.setToken(response.token);
-      authService.setUser(response.user);
-      setAuthState({
-        user: response.user,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    } catch (error) {
-      throw error;
-    }
+    setAuthState((prev) => ({ ...prev, isLoading: true }));
+
+    const res = await authService.login({ email, password });
+
+    authService.setToken(res.token);
+    authService.setUser(res.user);
+
+    setAuthState({
+      user: res.user,
+      isAuthenticated: true,
+      isLoading: false,
+    });
   };
 
-  const signup = async (email: string, password: string, fullName: string) => {
-    try {
-      const response = await authService.signup({ email, password, fullName });
-      authService.setToken(response.token);
-      authService.setUser(response.user);
-      setAuthState({
-        user: response.user,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    } catch (error) {
-      throw error;
-    }
+  const signup = async (email: string, password: string, name: string) => {
+    setAuthState((prev) => ({ ...prev, isLoading: true }));
+
+    const res = await authService.signup({ email, password, name });
+
+    authService.setToken(res.token);
+    authService.setUser(res.user);
+
+    setAuthState({
+      user: res.user,
+      isAuthenticated: true,
+      isLoading: false,
+    });
   };
 
   const logout = async () => {
-    try {
-      await authService.logout();
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-      });
-    } catch (error) {
-      throw error;
-    }
+    authService.logout();
+    setAuthState({
+      user: null,
+      isAuthenticated: false,
+      isLoading: false,
+    });
   };
 
   return (
