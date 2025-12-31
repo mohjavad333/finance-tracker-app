@@ -96,7 +96,7 @@ export default function Dashboard() {
     navigate('/');
   };
 
-  const handleAddTransaction = async (data: CreateTransactionDTO) => {
+  const handleAddTransaction = async (data: CreateTransactionDTO): Promise<void> => {
     try {
       const transaction = await createTransaction(data);
 
@@ -111,8 +111,6 @@ export default function Dashboard() {
           transactionId: transaction.id,
         }
       );
-
-      return transaction;
     } catch (error) {
       throw error;
     }
@@ -157,7 +155,7 @@ export default function Dashboard() {
                 </Button>
               </Link>
               <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
-                <span className="text-sm text-gray-700">{user?.fullName || user?.email}</span>
+                <span className="text-sm text-gray-700">{user?.name || user?.email}</span>
               </div>
               <Button
                 variant="ghost"
